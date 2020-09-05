@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<head>
+    <script defer src="https://unpkg.com/vue@next"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@100;300;400;500;700;900&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="about">
+        <p>例によってやってみただけのやつ</p>
+        リポジトリ: <a href="https://github.com/called-d/face-of-text">github.com/called-d/face-of-text</a>
+    </div>
+    <div id="app" class="app-area">
+        <textarea class="text-area" v-model="text"></textarea>
+        <div class="dst-area" ref="dstArea">
+            <colored-text :text="text"></colored-text>
+        </div>
+        <label for="img-input" class="img-area">
+            <img class="src-img" ref="srcImg" @load="imgLoaded" :src="imgUrl" alt="ソース画像" />
+            <input type="file" id="img-input" @change="changeImage" />
+        </div>
+    </div>
+
+    <script>
+        const text = `　　　　　　　　　＊
+　おお、神よ。爾は、一切の善きものを、勞力の價を以て、我等に賣り給へり。
+　　　　　　　　　＊
+　古人を模倣する事は、今人を模倣する事より、賞贊に値する。
+　　　　　　　　　＊
+「生」に於て、「美」は死滅する。が、「藝術」に於ては、死滅しない。
+　　　　　　　　　＊
+　感情の至上の力が存する所に、殉教者中の最大なる殉教者がある。
+　　　　　　　　　＊
+　我等の故郷に歸らんとする、我等の往時の状態に還らんとする、希望と欲望とを見よ。如何にそれが、光に於ける蛾ひとりむしに似てゐるか。絶えざる憧憬を以て、常に、新なる春と新なる夏と、新なる月と新なる年とを、悦び望み、その憧憬する物の餘りに遲く來るのを歎ずる者は、實は彼自身己の滅亡を憧憬しつつあると云ふ事も、認めずにしまふ。しかし、この憧憬こそは、五元の精髓であり精神である。それは肉體の生活の中に幽閉せられながら、しかも猶、その源に歸る事を望んでやまない。自分は、諸君にかう云ふ事を知つて貰ひたいと思ふ。この同じ憧憬が、自然の中に生來存してゐる精髓だと云ふ事を。さうして、人間は世界の一タイプだと云ふ事を。
+　　　　　　　　　＊
+　善く費された日が、幸福な眠を齎すやうに、善く用ひられた生は、幸福な死を將來する。
+　　　　　　　　　＊
+　自分が、如何に生く可きかを學んでゐたと思つてゐる間に、自分は、如何に死す可きかを學んでゐたのである。
+　　　　　　　　　＊
+　鐵は、用ひない時に、※(「金＋肅」、第3水準1-93-39)る。溜り水は、濁つて、寒天には、氷結する。懈怠が心の活力を奪ふ事も亦、これに比しい。
+　　　　　　　　　＊
+　おお「時」よ。一切を滅却する爾よ。おお嫉みふかき時代よ。爾は、年の鋭き齒牙を以て、徐なる死に、一切を破壞し、一切を併呑する。ヘレンは、老年が面上に刻した皺を、鏡中の影に認めた時、泣いて、何故に彼女が二度までも誘拐し去られたかを怪んだ。
+　おお「時」よ。一切を滅却する爾よ。おお一切を滅却する嫉みふかき時代よ。
+　　　　　　　　　＊
+　木は、木を滅する火の燃料となる。
+　　　　　　　　　＊
+　最大の不幸は、理論が手腕を超過した時である。
+
+[レオナルド・ダ・ヴインチの手記](https://www.aozora.gr.jp/cards/002016/card59231.html)`
+
+        const updateColor = (areaEl, imageData) => {
+            console.log('updateColor', imageData)
+            if (!imageData) { return }
+            const getPixelData = (x, y) => {
+                const pixelIndex = y * imageData.width + x
+                return {
+                    r: imageData.data[4 * pixelIndex + 0],
+                    g: imageData.data[4 * pixelIndex + 1],
+                    b: imageData.data[4 * pixelIndex + 2],
+                    a: imageData.data[4 * pixelIndex + 3],
+                }
+            }
+            Array.prototype.forEach.call(areaEl.children, c => {
+                const y = Math.round(c.offsetTop / areaEl.clientHeight * imageData.height)
+                const x = Math.round(c.offsetLeft / areaEl.clientWidth * imageData.width)
+                const w = Math.round(c.offsetWidth / areaEl.clientWidth * imageData.width)
+                const h = Math.round(c.offsetHeight / areaEl.clientHeight * imageData.height)
+
+                // let n = 0, r_ = 0, g_ = 0, b_ = 0, a_ = 0;
+                // for (let j = 0; j < h; j++) {
+                //     for (let i = 0; i < w; i++) {
+                //         const { r, g, b, a } = getPixelData(x + i, y + j)
+                //         r_ += r
+                //         g_ += g
+                //         b_ += b
+                //         a_ += a
+                //         n++
+                //     }
+                // }
+                // r_ /= n
+                // g_ /= n
+                // b_ /= n
+                // a_ /= n
+                const { r: r_, g: g_, b: b_, a: a_ } = getPixelData(x, y)
+
+                c.style.opacity = 0.5 + 0.5 * a_ / 256
+                c.style.color = `rgb(${r_} ${g_} ${b_}`
+                c.style.fontWeight = [900, 700, 500, 400, 300, 100][Math.floor((r_+g_+b_)/3/255*6    * 2.5)] ?? 100
+            })
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const { ref, createApp, h, onMounted, onUpdated, nextTick } = Vue
+
+            let imageData
+            const canvas = document.createElement('canvas')
+            const updateImageData = imgEl => {
+                const w = canvas.width = imgEl.naturalWidth
+                const h = canvas.height = imgEl.naturalHeight
+                const ctx = canvas.getContext('2d')
+                ctx.drawImage(imgEl, 0, 0)
+                imageData = ctx.getImageData(0, 0, w, h)
+            }
+
+            const srcImg = ref(null)
+            const dstArea = ref(null)
+            const imgUrl = ref('')
+
+            const initialData = {
+                text: ref(text + text + text),
+                imgUrl
+            }
+
+            const app = createApp({
+                setup () {
+                    onMounted(() => {
+                        imgUrl.value = './Leonardo_helicopter.jpg'
+                    })
+                    onUpdated(() => {
+                        updateColor(dstArea.value, imageData)
+                    })
+                    return {
+                        srcImg,
+                        dstArea,
+                        ...initialData,
+                        changeImage (ev) {
+                            URL.revokeObjectURL(imgUrl.value)
+                            const file = ev.target.files[0]
+                            const url = URL.createObjectURL(file)
+                            imgUrl.value = url
+
+                        },
+                        imgLoaded () {
+                            updateImageData(srcImg.value)
+                            updateColor(dstArea.value, imageData)
+                        }
+                    }
+                }
+            })
+            app.component('colored-text', {
+                props: { text: { type: String, required: true } },
+                setup (props) { return () => props.text.replace(/　+/g, ' ').split('').map(c => h('span', c)) }
+            })
+            app.mount('#app')
+        }, false)
+    </script>
+
+    <style>
+        html, body {
+            margin: 0; padding: 0;
+        }
+        .app-area {
+            display: flex;
+        }
+        .text-area, .dst-area, .img-area {
+            width: calc(100% / 3);
+        }
+        .text-area {
+            resize: none;
+        }
+        .dst-area {
+            position: relative;
+            font-family: 'Noto Sans JP', sans-serif;
+
+            /* font-size: 0.8rem; */
+            /* word-break: break-all;
+            white-space: pre-line; */
+
+            font-size: 0.5em;
+        }
+        .img-area {
+            height: 100%;
+        }
+        .img-area:hover {
+            outline: 2px dashed gray;
+        }
+        .src-img {
+            height: 100%;
+            width: 100%;
+            object-fit: contain;
+        }
+    </style>
+</body>
